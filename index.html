@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyGP Style Blog</title>
+    <style>
+        /* --- বেসিক সেটআপ --- */
+        :root {
+            --primary: #00A3FF; /* MyGP Blue */
+            --accent: #FF5A5F;
+            --glass: rgba(255, 255, 255, 0.95);
+            --glass-dark: rgba(20, 20, 20, 0.6);
+            --radius: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        
+        body {
+            background-color: #000;
+            overflow: hidden; /* অ্যাপের মতো ফিক্সড */
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* --- ব্যাকগ্রাউন্ড ইমেজ --- */
+        .app-background {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            /* আপনার ছবির নাম এখানে দিন */
+            background-image: url('unnamed (1).jpg'); 
+            background-size: cover;
+            background-position: center;
+            filter: blur(5px) brightness(0.6); /* ব্লার এবং ডার্ক ইফেক্ট */
+            z-index: -1;
+        }
+
+        /* --- অ্যাপ কন্টেইনার --- */
+        #app {
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+            padding-bottom: 80px;
+        }
+
+        /* --- হেডার --- */
+        header {
+            padding: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .profile-pic {
+            width: 45px; height: 45px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            background-image: url('unnamed (1).jpg'); /* প্রোফাইল হিসেবেও ব্যবহার করা হলো */
+            background-size: cover;
+        }
+
+        /* --- ক্যাটাগরি সেকশন (MyGP Style) --- */
+        .section-title {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 20px 0 10px 20px;
+        }
+
+        .scroll-container {
+            display: flex;
+            overflow-x: auto;
+            padding: 0 20px;
+            gap: 15px;
+            scrollbar-width: none; /* Firefox hide scroll */
+        }
+        .scroll-container::-webkit-scrollbar { display: none; } /* Chrome hide scroll */
+
+        /* --- কার্ড ডিজাইন --- */
+        .card {
+            background: var(--glass);
+            border-radius: var(--radius);
+            padding: 15px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .card:active { transform: scale(0.95); }
+
+        /* বিভিন্ন শেপ (Shape) */
+        .card.square { width: 140px; height: 140px; }
+        .card.rect { width: 220px; height: 140px; }
+        .card.tall { width: 140px; height: 200px; }
+
+        .card-cat {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: #666;
+            background: #eee;
+            padding: 3px 8px;
+            border-radius: 10px;
+            width: fit-content;
+        }
+        .card-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-top: 5px;
+            line-height: 1.3;
+        }
+        .card-preview {
+            font-size: 12px;
+            color: #555;
+            margin-top: 5px;
+            /* ২ লাইনের পর ডট ডট (...) দেখাবে */
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* --- ফ্লোটিং অ্যাকশন বাটন (FAB) --- */
+        .fab {
+            position: fixed;
+            bottom: 25px; right: 25px;
+            width: 60px; height: 60px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center; justify-content: center;
+            color: white; font-size: 30px;
+            box-shadow: 0 5px 20px rgba(0,163,255, 0.4);
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        /* --- ফুল স্ক্রিন পেজ (Explore & Admin) --- */
+        .full-page {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff;
+            z-index: 200;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+        .full-page.active { transform: translateY(0); }
+
+        .page-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: white;
+        }
+        .back-btn { font-size: 24px; cursor: pointer; }
+        
+        .page-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* --- ইনপুট ফিল্ড ডিজাইন --- */
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        textarea { height: 150px; resize: none; }
+        .post-btn {
+            background: var(--primary);
+            color: white; border: none;
+            padding: 15px; width: 100%;
+            border-radius: 8px; font-weight: bold; font-size: 16px;
+        }
+
+        /* --- বিস্তারিত পোস্ট স্টাইল --- */
+        .blog-detail-title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+        .blog-detail-meta { color: #777; font-size: 12px; margin-bottom: 20px; }
+        .blog-detail-text { font-size: 16px; line-height: 1.6; white-space: pre-wrap; color: #333; }
+        .share-btn {
+            margin-top: 30px;
+            padding: 10px 20px;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            border-radius: 20px;
+            background: white;
+            font-weight: 600;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-background"></div>
+
+    <div id="app">
+        <header>
+            <div>
+                <h2 style="font-weight: 400; font-size: 14px;">শুভ সকাল,</h2>
+                <h1 style="font-weight: 700;">মঞ্জুরুল হক</h1>
+            </div>
+            <div class="profile-pic"></div>
+        </header>
+
+        <div id="categories-container">
+            </div>
+    </div>
+
+    <div class="fab" onclick="openAdmin()">+</div>
+
+    <div class="full-page" id="explorePage">
+        <div class="page-header">
+            <span class="back-btn" onclick="closePage('explorePage')">&#8592;</span>
+            <h3>বিস্তারিত ব্লগ</h3>
+        </div>
+        <div class="page-content" id="exploreContent">
+            </div>
+    </div>
+
+    <div class="full-page" id="adminPanel">
+        <div class="page-header">
+            <span class="back-btn" onclick="closePage('adminPanel')">&#10005;</span>
+            <h3>নতুন পোস্ট লিখুন</h3>
+        </div>
+        <div class="page-content">
+            <label>শিরোনাম (Title)</label>
+            <input type="text" id="inpTitle" placeholder="ব্লগের শিরোনাম দিন...">
+            
+            <label>ক্যাটাগরি</label>
+            <select id="inpCat">
+                <option value="Education">Education (বর্গাকার)</option>
+                <option value="Lifestyle">Lifestyle (আয়তাকার)</option>
+                <option value="Tech">Tech & AI (লম্বা)</option>
+            </select>
+
+            <label>বিস্তারিত (লাইন ব্রেক ও ইমোজি সাপোর্ট)</label>
+            <textarea id="inpBody" placeholder="আপনার মনের কথা লিখুন... &#128512;"></textarea>
+
+            <button class="post-btn" onclick="savePost()">পোস্ট করুন</button>
+        </div>
+    </div>
+
+    <script>
+        // ডিফল্ট কিছু ডাটা (যদি কোনো পোস্ট না থাকে)
+        const defaultPosts = [
+            { id: 1, title: "অর্থনীতির সহজ পাঠ", cat: "Education", body: "অর্থনীতি আসলে ভয়ের কিছু নয়। চাহিদা ও যোগান বুঝতে পারলেই সব সহজ।", date: "Jan 7, 2026" },
+            { id: 2, title: "এআই দিয়ে আয়ের উপায়", cat: "Tech", body: "চ্যাটজিপিটি বা জেমিনাই ব্যবহার করে কন্টেন্ট লিখে বা কোডিং করে আয় করা সম্ভব।", date: "Jan 6, 2026" },
+            { id: 3, title: "সুস্থ থাকার টিপস", cat: "Lifestyle", body: "প্রতিদিন সকালে হাঁটা এবং পরিমিত পানি পান করা স্বাস্থ্যের জন্য ভালো।", date: "Jan 5, 2026" }
+        ];
+
+        // পোস্ট লোড করা (লোকাল স্টোরেজ থেকে)
+        let posts = JSON.parse(localStorage.getItem('myBlogPosts')) || defaultPosts;
+
+        // মেইন রেন্ডার ফাংশন
+        function renderHome() {
+            const container = document.getElementById('categories-container');
+            container.innerHTML = '';
+
+            // ইউনিক ক্যাটাগরি খুঁজে বের করা
+            const categories = [...new Set(posts.map(p => p.cat))];
+
+            categories.forEach(cat => {
+                // ১. ক্যাটাগরি টাইটেল
+                const title = document.createElement('div');
+                title.className = 'section-title';
+                title.innerText = cat;
+                container.appendChild(title);
+
+                // ২. স্ক্রল কন্টেইনার
+                const scrollBox = document.createElement('div');
+                scrollBox.className = 'scroll-container';
+
+                // ৩. কার্ড ফিল্টার ও তৈরি
+                posts.filter(p => p.cat === cat).forEach(post => {
+                    const card = document.createElement('div');
+                    
+                    // ক্যাটাগরি অনুযায়ী শেপ পরিবর্তন
+                    let shapeClass = 'square';
+                    if(cat === 'Lifestyle') shapeClass = 'rect';
+                    if(cat === 'Tech') shapeClass = 'tall';
+
+                    card.className = `card ${shapeClass}`;
+                    card.innerHTML = `
+                        <div>
+                            <span class="card-cat">${post.cat}</span>
+                            <div class="card-title">${post.title}</div>
+                        </div>
+                        <div class="card-preview">${post.body}</div>
+                    `;
+                    card.onclick = () => openExplore(post);
+                    scrollBox.appendChild(card);
+                });
+
+                container.appendChild(scrollBox);
+            });
+        }
+
+        // --- ফাংশনালিটি ---
+
+        // অ্যাডমিন প্যানেল খোলা
+        function openAdmin() {
+            document.getElementById('adminPanel').classList.add('active');
+        }
+
+        // এক্সপ্লোর পেজ খোলা
+        function openExplore(post) {
+            const explorePage = document.getElementById('explorePage');
+            const content = document.getElementById('exploreContent');
+            
+            content.innerHTML = `
+                <div class="blog-detail-title">${post.title}</div>
+                <div class="blog-detail-meta">ক্যাটাগরি: ${post.cat} | তারিখ: ${post.date}</div>
+                <div class="blog-detail-text">${post.body}</div>
+                <button class="share-btn" onclick="alert('শেয়ার লিঙ্ক কপি হয়েছে!')">📤 বন্ধুদের সাথে শেয়ার করুন</button>
+            `;
+            explorePage.classList.add('active');
+        }
+
+        // পেজ বন্ধ করা
+        function closePage(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // নতুন পোস্ট সেভ করা
+        function savePost() {
+            const title = document.getElementById('inpTitle').value;
+            const cat = document.getElementById('inpCat').value;
+            const body = document.getElementById('inpBody').value;
+
+            if(!title || !body) {
+                alert("দয়া করে টাইটেল এবং বিস্তারিত লিখুন");
+                return;
+            }
+
+            const newPost = {
+                id: Date.now(),
+                title: title,
+                cat: cat,
+                body: body,
+                date: new Date().toLocaleDateString()
+            };
+
+            // অ্যারের শুরুতে যোগ করা
+            posts.unshift(newPost);
+            localStorage.setItem('myBlogPosts', JSON.stringify(posts));
+
+            // ইনপুট ক্লিয়ার ও হোম আপডেট
+            document.getElementById('inpTitle').value = '';
+            document.getElementById('inpBody').value = '';
+            renderHome();
+            closePage('adminPanel');
+        }
+
+        // অ্যাপ চালু হলে কল হবে
+        renderHome();
+
+    </script>
+</body>
+</html>
